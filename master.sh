@@ -9,7 +9,9 @@ DAY=$(date +%d)
 MONTH=$(date +%m)
 YEAR=$(date +%Y)
 
-YEAR=2017
+YEAR=2018
+MONTH=05
+DAY=12
 # change to today - 1 test this!
 
 #TODO
@@ -20,12 +22,13 @@ YEAR=2017
 
 # line from Andrea to download data
 # arguments are documented in EUMetsat's docs
-###./dhusget.sh -u $username -p $password -m Sentinel-3 -i OLCI -c -129,52.6:-123.7,48.5 -l 100 -N 5 -o product -F filename:S3A_OL_1*EFR*NT* -S
+./echo_args.sh -u $username -p $password -m Sentinel-3 -i OLCI -c -129,52.6:-123.7,48.5 -l 100 -N 5 -o product -F filename:S3A_OL_1*EFR*NT* \
+-S $YEAR-$MONTH-$DAY T00:00:00.000Z -E $YEAR-$MONTH-$DAY T23:59:59.000Z -O L1/$YEAR/$MONTH/$DAY
 
 ###unzip "./L1/$YEAR/$MONTH/$DAY/*" -d ./L1/$YEAR/$MONTH/$DAY
 
-mkdir ./L2/$YEAR/$MONTH/$DAY -p
+###mkdir ./L2/$YEAR/$MONTH/$DAY -p
 
-source activate auto-olci
+###source activate auto-olci
 
-python polymer48/run_polymer.py ./L1/$YEAR/$MONTH/$DAY/ ./L2/$YEAR/$MONTH/$DAY/
+###python polymer48/run_polymer.py ./L1/$YEAR/$MONTH/$DAY/ ./L2/$YEAR/$MONTH/$DAY/
