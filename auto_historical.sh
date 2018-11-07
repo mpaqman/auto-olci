@@ -1,34 +1,35 @@
 #!/bin/bash 
 
-# Login credentials are stored in credentials file so that this script can be pushed to github
+# Login credentials are stored in extrenal credentials file so that this script can be pushed to github
 username=$(grep username ./credentials | awk -F"'" '{print $2}')
 password=$(grep password ./credentials | awk -F"'" '{print $2}')
 
-# set dates here so I can edit them during testing
-DAY=$(date +%d)
-MONTH=$(date +%m)
-YEAR=$(date +%Y)
+# Start and end in the following format: 'YYYY-MM-DD'
+DATE_START='2017-07-24'
+DATE_END='2017-07-24'
 
-YEAR=2017
-MONTH=05
-DAY=12
-# change to today - 1 test this!
+# Coordinates as 'lon1,lat1:lon2,lat2'. E.g. COORDS='-139,47:-121.5,59.5'
+COORDS='-139,47:-121.5,59.5'
 
-#TODO
-# handle holes in data
-# 2 scripts: daily time critical & historical non time critical
+# DATE_ITER iterates through the dates
+DATE_ROLL=$DATE_START
 
-## This only works for old data... (non time-critical)
+while [ "$(date -d "$DATE_ROLL" +%Y%m%d)" -le "$(date -d "$DATE_END" +%Y%m%d)" ]; do
+	# set YEAR, MONTH & DAY based off DATE_ROLL
+	YEAR=$(date -d "$DATE_ROLL" '+%Y')
+	MONTH=$(date -d "$DATE_ROLL" '+%m')
+	DAY=$(date -d "$DATE_ROLL" '+%d')
 
-# line from Andrea to download data
-# we want level 1 radiances at full resolution (EFR)
-# arguments are documented in EUMetsat's docs
-###./dhusget.sh -u $username -p $password -m Sentinel-3 -i OLCI -c -129,52.6:-123.7,48.5 -l 100 -N 5 -o 'product' -F filename:S3A_OL_1*EFR*NT* -O ./L1/$YEAR/$MONTH/$DAY -S $YEAR'-'$MONTH'-'$DAY'T00:00:00.000Z' -E $YEAR'-'$MONTH'-'$DAY'T23:59:59.000Z'
+	# we want level 1 radiances at full resolution (EFR)
+	# arguments are documented in EUMetsat's docs
+	./dhusget.sh -u $username -p $password -m Sentinel-3 -i OLCI -c $COORDS -l 100 -N 5 -o 'product' -F filename:S3A_OL_1*EFR*NT* -O ./files/$YEAR/$MONTH/$DAY -S $YEAR'-'$MONTH'-'$DAY'T00:00:00.000Z' -E $YEAR'-'$MONTH'-'$DAY'T23:59:59.000Z'
 
-###unzip "./L1/$YEAR/$MONTH/$DAY/*" -d ./L1/$YEAR/$MONTH/$DAY
+	unzip "./files/$YEAR/$MONTH/$DAY/*" -d ./files/$YEAR/$MONTH/$DAY
 
-###mkdir ./L2/$YEAR/$MONTH/$DAY -p
+	source activate poly3
 
-source activate poly3
+	python run_polymer.py ./files/$YEAR/$MONTH/$DAY/
 
-python 																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																							run_polymer.py ./L1/$YEAR/$MONTH/$DAY/ ./L2/$YEAR/$MONTH/$DAY/
+	# Move forward one day
+	DATE_ROLL=$(date -d "$DATE_ROLL + 1 day")
+done
